@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Hoje</a>
+            <a href="novo.html">Novo pedido</a>
+        </nav>
+    </header>
+    <main>
+        <template>
+            <div class="item flex_rows">
+                <div class="flex_columns">
+                    <div class="data"></div>
+                    <a class="editar" href="">Editar</a>
+                </div>
+                <div class="telefone">
+                    <a href=""></a>
+                </div>
+                <div class="endereco"></div>
+                <div class="flex_columns">
+                    <div class="total"></div>
+                    <div class="status"></div>
+                </div>
+            </div>
+        </template>
+        <div id="pedidos"></div>
+    </main>
+    <footer>
+        <div class="flex_columns">
+            <form>
+                <label>Data: <input name="data" type="date" /></label>
+                <button type="submit">Aplicar</button>
+            </form>
+            <form>
+                <label>Mês: <input name="data" type="month" /></label>
+                <button type="submit">Aplicar</button>
+            </form>
+        </div>
+    </footer>
+</div>
+
+<script>
+
+const query = new URLSearchParams(window.location.search);
+let url = 'api/v1/pedidos';
+
+if (query.has('data'))
+{
+    url += `?data=${query.get('data')}`;
+}
+else if (query.has('tel'))
+{
+    url += `/cliente?tel=${query.get('tel')}`;
+}
+else
+{
+    url += '?data=' + new Date().toLocaleDateString('sv-SE');
+}
+
+buscarPedidos(url);
+
+document.querySelectorAll('form').forEach(item =>
+{
+    item.addEventListener('submit', e =>
+    {
+        e.preventDefault();
+
+        const params = new URLSearchParams(new FormData(item));
+        const url = `api/v1/pedidos?${params.toString()}`;
+
+        const novaURL = new URL(window.location);
+        novaURL.search = params.toString();
+        window.history.replaceState({}, '', novaURL);
+
+        buscarPedidos(url);
+    });
+});
+
+function buscarPedidos(url)
+{
+    fetch(url)
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        renderizarPedidos(json.pedidos);
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function renderizarPedidos(pedidos)
+{
+    const container = document.getElementById('pedidos');
+    const template = document.querySelector('template');
+
+    container.innerHTML = '';
+
+    pedidos.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const total = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.total);
+        const data = new Intl.DateTimeFormat('pt-BR', {day: 'numeric', month: 'long'}).format(new Date(item.data));
+
+        clone.querySelector('.data').textContent = data;
+        clone.querySelector('.editar').href = `pedido.html?id=${item.id}`;
+        clone.querySelector('.total').textContent = total;
+        clone.querySelector('.status').textContent = item.status;
+
+        if (item.telefone)
+        {
+            clone.querySelector('.telefone a').textContent = item.telefone;
+            clone.querySelector('.telefone a').href = `pedidos.html?tel=${item.telefone}`;
+        }
+        else
+        {
+            clone.querySelector('.telefone').remove();
+        }
+
+        if (item.endereco)
+        {
+            clone.querySelector('.endereco').textContent = item.endereco;
+        }
+        else
+        {
+            clone.querySelector('.endereco').remove();
+        }
+
+        container.appendChild(clone);
+    });
+}
+
+</script>
+    
+</body>
+</html>

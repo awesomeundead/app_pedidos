@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apagar pedido</title>
+</head>
+<body>
+
+<input type="number" />
+<button>Apagar</button>
+
+<script>
+
+document.querySelector('button').addEventListener('click', () =>
+{
+    const number = document.querySelector('input[type="number"]').value;
+
+    if (number > 0)
+    {
+        apagarPedido(number);
+    }
+});
+
+function apagarPedido(number)
+{
+    fetch(`api/v1/pedido/${number}`,
+    {
+        method: 'DELETE'
+    })
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        console.log(json);
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+</script>
+    
+</body>
+</html>

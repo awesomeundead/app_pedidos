@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualizar pedido</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<script src="default.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="novo.html">Novo pedido</a>
+        </nav>
+        <div class="flex_rows">
+            <div class="flex_columns">
+                <div>ID:</div>
+                <div class="input_id"></div>
+            </div>
+            <div class="flex_columns">
+                <div>Data:</div>
+                <div class="input_data"></div>
+            </div>
+            <div class="identificacao">
+                <input name="nome" placeholder="Nome" type="text" />
+                <input maxlength="15" name="telefone" placeholder="Telefone" type="tel" />
+                <input list="logradouros" name="endereco" placeholder="Endereço" type="text" />
+            </div>
+        </div>
+    </header>
+    <main>
+        <template>
+            <div class="item">
+                <div class="imagem">
+                    <img alt="" src="" />
+                </div>
+                <div>
+                    <div class="nome"></div>
+                    <div class="quantidade"></div>
+                </div>
+                <div>
+                    <div class="subtotal"></div>
+                </div>
+            </div>
+        </template>
+        <div id="produtos"></div>
+    </main>
+    <footer>
+        <div class="flex_rows">
+            <div class="flex_columns">
+                <div class="gap">
+                    <label>Subtotal (R$)</label>
+                    <input class="short" id="subtotal" name="subtotal" readonly="readonly" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Desconto (R$)</label>
+                    <input class="short" id="desconto" min="0" name="desconto" step=".01" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Frete (R$)</label>
+                    <input class="short" id="frete" min="0" name="frete" step=".01" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Total (R$)</label>
+                    <input class="short" id="total" name="total" readonly="readonly" type="number" />
+                </div>
+            </div>
+            <select name="pagamento" required="required">
+                <option disabled="disabled">Pagamento</option>
+                <option>Dinheiro</option>
+                <option>Pix</option>
+                <option>Débito</option>
+                <option>Crédito</option>
+            </select>
+            <select name="status" required="required">
+                <option disabled="disabled">Status</option>
+                <option>Preparando</option>
+                <option>Concluído</option>
+                <option>Cancelado</option>
+            </select>
+            <button type="submit">Atualizar pedido</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+
+const query = new URLSearchParams(window.location.search);
+
+if (!query.has('id'))
+{
+    location.href = 'pedidos.html';
+}
+
+fetch(`api/v1/pedido/${query.get('id')}`)
+.then(response => 
+{
+    if (!response.ok)
+    {
+        throw new Error(response.statusText);
+    }
+
+    return response.json();
+})
+.then(json =>
+{
+    const container = document.getElementById('produtos');
+    const data = new Intl.DateTimeFormat('pt-BR', {day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric'}).format(new Date(json.data));
+
+    document.querySelector('.input_id').innerHTML = json.id;
+    document.querySelector('.input_data').innerHTML = data;
+    document.querySelector('input[name="nome"]').value = json.nome;
+    document.querySelector('input[name="telefone"]').value = json.telefone;
+    document.querySelector('input[name="endereco"]').value = json.endereco;
+    document.querySelector('input[name="subtotal"]').value = json.subtotal;
+    document.querySelector('input[name="desconto"]').value = json.desconto;
+    document.querySelector('input[name="frete"]').value = json.frete;
+    document.querySelector('input[name="total"]').value = json.total;
+    document.querySelector('select[name="pagamento"]').value = json.pagamento;
+    document.querySelector('select[name="status"]').value = json.status;
+
+    const template = document.querySelector('template');
+
+    json.itens.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const subtotal = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.subtotal);
+        const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+
+        clone.querySelector('.imagem img').src = `imagens/${imagem}`;
+        clone.querySelector('.nome').textContent = item.nome;
+        clone.querySelector('.quantidade').textContent = `Quantidade: ${item.quantidade}`;
+        clone.querySelector('.subtotal').textContent = subtotal;
+
+        container.appendChild(clone);
+    });
+})
+.catch(error =>
+{
+    console.error('Erro ao carregar:', error);
+});
+
+logradouros();
+
+function calcular()
+{
+    subtotal = document.getElementById('subtotal').value;
+    desconto = document.getElementById('desconto').value;
+    frete = document.getElementById('frete').value;
+
+    if (desconto.trim() === '')
+    {
+        desconto = 0;
+    }
+
+    if (frete.trim() === '')
+    {
+        frete = 0;
+    }
+
+    desconto = parseFloat(desconto);
+    frete = parseFloat(frete);
+    total = (subtotal - desconto) + frete;
+
+    document.getElementById('total').value = total.toFixed(2);
+}
+
+document.getElementById('desconto').addEventListener('change', () =>
+{
+    calcular();
+});
+
+document.getElementById('frete').addEventListener('change', () =>
+{
+    calcular();
+});
+
+document.querySelector('button[type="submit"]').addEventListener('click', e =>
+{
+    e.preventDefault();
+
+    if (confirm('Você confirma esta ação?'))
+    {
+        const body = {};
+
+        document.querySelectorAll('input').forEach(item =>
+        {
+            body[item.name] = item.value;
+        });
+
+        document.querySelectorAll('select').forEach(item =>
+        {
+            body[item.name] = item.value;
+        });
+
+        fetch(`api/v1/pedido/${query.get('id')}`,
+        {
+            body: JSON.stringify(body),
+            headers:
+            {
+                'Content-Type': 'application/json'
+            },
+            method: 'put'
+        })
+        .then(response =>
+        {
+            if (!response.ok)
+            {
+                throw new Error(response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(json =>
+        {
+            notification(json.status, {success: 'Pedido atualizado com sucesso.', failure: 'Falha ao atualizar pedido.'});
+        })
+        .catch(error =>
+        {
+            console.error('Erro ao carregar:', error);
+        });
+    }
+});
+
+</script>
+    
+</body>
+</html>

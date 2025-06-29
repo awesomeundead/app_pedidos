@@ -1,0 +1,120 @@
+.notification
+{
+    font-weight: bold;
+    padding: 5px;
+}
+
+.notification.failure
+{
+    background-color: firebrick;
+    color: #FFF;
+}
+
+.notification.success
+{
+    background-color: forestgreen;
+    color: #FFF;
+}
+
+.identificacao
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.identificacao input
+{
+    border: none;
+    border-bottom: 1px solid #999;
+    padding: 10px 0;
+}
+
+#produtos
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px
+}
+
+#produtos .item
+{
+    display: grid;
+    gap: 5px;
+    grid-template-columns: auto 1fr auto;
+}
+
+#produtos .item .nome
+{
+    font-weight: bold;
+}
+
+#produtos .item .preco
+{
+    color: #999;
+}
+
+#produtos .item .preco.riscado
+{
+    text-decoration: line-through;
+}
+
+#produtos .item .imagem
+{
+    display: flex;
+}
+
+#produtos .item .imagem img
+{
+    border-radius: 5px;
+    width: 64px;
+}
+
+.flex_rows
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.flex_columns
+{
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex_columns .gap
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#pedidos
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px
+}
+
+#pedidos .item
+{
+    background-color: #EEE;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5;
+    padding: 5px;
+}
+
+#pedidos .item .data, #pedidos .item .endereco
+{
+    font-weight: bold;
+}
+
+#pedidos .item .telefone
+{
+    display: flex;
+    justify-content: right;
+}

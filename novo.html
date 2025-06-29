@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novo pedido</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<script src="default.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Pedidos</a>
+        </nav>
+        <div class="identificacao">
+            <input name="nome" placeholder="Nome" type="text" />
+            <input maxlength="15" name="telefone" placeholder="Telefone" type="tel" />
+            <input list="logradouros" name="endereco" placeholder="Endereço" type="text" />
+        </div>
+    </header>
+    <main>
+        <div class="flex_columns">
+            <div>Selecione os itens</div>
+            <div>Quantidade</div>
+        </div>
+        <template>
+            <div class="item">
+                <input name="itens_id[]" type="hidden" />
+                <input name="itens_preco[]" type="hidden" />
+                <input name="itens_preco_desconto[]" type="hidden" />
+                <div class="imagem">
+                    <img alt="" src="" />
+                </div>
+                <div>
+                    <div class="nome"></div>
+                    <div class="preco"></div>
+                    <div class="preco_desconto"></div>
+                </div>
+                <div>
+                    <input class="short" min="0" name="itens_quantidade[]" type="number" />
+                </div>
+            </div>
+        </template>
+        <div id="produtos"></div>
+    </main>
+    <footer>
+        <div class="flex_rows">
+            <div class="flex_columns">
+                <div class="gap">
+                    <label>Subtotal (R$)</label>
+                    <input class="short" id="subtotal" name="subtotal" readonly="readonly" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Desconto (R$)</label>
+                    <input class="short" id="desconto" min="0" name="desconto" step=".01" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Frete (R$)</label>
+                    <input class="short" id="frete" min="0" name="frete" step=".01" type="number" />
+                </div>
+                <div class="gap">
+                    <label>Total (R$)</label>
+                    <input class="short" id="total" name="total" readonly="readonly" type="number" />
+                </div>
+            </div>
+            <select name="pagamento" required="required">
+                <option disabled="disabled" selected="selected" value="">Pagamento</option>
+                <option>Dinheiro</option>
+                <option>Pix</option>
+                <option>Débito</option>
+                <option>Crédito</option>
+            </select>
+            <button type="submit">Criar pedido</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+
+fetch('api/v1/produtos')
+.then(response => 
+{
+    if (!response.ok)
+    {
+        throw new Error(response.statusText);
+    }
+
+    return response.json();
+})
+.then(json =>
+{
+    const container = document.getElementById('produtos');
+    const template = document.querySelector('template');
+
+    json.produtos.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+        const currency = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+
+        clone.querySelector('[name="itens_id[]"]').value = item.id;
+        clone.querySelector('[name="itens_preco[]"]').value = item.preco;
+        clone.querySelector('[name="itens_preco[]"]').dataset.itemPreco = item.id;
+        clone.querySelector('[name="itens_preco_desconto[]"]').value = item.preco_desconto;
+        clone.querySelector('[name="itens_preco_desconto[]"]').dataset.itemPrecoDesconto = item.id;
+        clone.querySelector('[name="itens_quantidade[]"]').dataset.itemQuantidade = item.id;
+        clone.querySelector('.imagem img').src = `imagens/${imagem}`;
+        clone.querySelector('.nome').textContent = item.nome;
+        clone.querySelector('.preco').textContent = currency.format(item.preco);
+
+        if (item.preco_desconto)
+        {
+            clone.querySelector('.preco_desconto').textContent = currency.format(item.preco_desconto);
+            clone.querySelector('.preco').classList.add('riscado');
+        }
+        else
+        {
+            clone.querySelector('.preco_desconto').remove();
+        }
+
+        container.appendChild(clone);
+    });
+
+    document.querySelectorAll('input[name="itens_quantidade[]"]').forEach(item =>
+    {        
+        item.addEventListener('change', () =>
+        {
+            adicionar_carrinho(item);
+        });
+
+        item.addEventListener('keyup', () =>
+        {
+            adicionar_carrinho(item);
+        });
+    });
+})
+.catch(error =>
+{
+    console.error('Erro ao carregar:', error);
+});
+
+logradouros();
+
+function adicionar_carrinho(item)
+{
+    item_id = item.dataset.itemQuantidade;
+
+    item_preco = document.querySelector(`[data-item-preco="${item_id}"]`).value;
+    item_preco_desconto = document.querySelector(`[data-item-preco-desconto="${item_id}"]`).value;
+
+    if (item_preco_desconto > 0)
+    {
+        item_preco = item_preco_desconto;
+        console.log(item_preco_desconto);
+    }
+
+    subtotal = item_preco * item.value;
+
+    carrinho[`item${item_id}`] = {
+        "id": item_id,
+        "subtotal": subtotal
+    }
+
+    calcular();
+}
+
+function calcular()
+{
+    var subtotal = 0;
+
+    for (const property in carrinho)
+    {
+        subtotal += carrinho[property]['subtotal'];
+    }
+
+    document.getElementById('subtotal').value = subtotal.toFixed(2);
+    desconto = document.getElementById('desconto').value;
+    frete = document.getElementById('frete').value;
+
+    if (desconto.trim() === '')
+    {
+        desconto = 0;
+    }
+
+    if (frete.trim() === '')
+    {
+        frete = 0;
+    }
+
+    desconto = parseFloat(desconto);
+    frete = parseFloat(frete);
+    total = (subtotal - desconto) + frete;
+
+    document.getElementById('total').value = total.toFixed(2);
+}
+
+var carrinho = {};
+
+document.getElementById('desconto').addEventListener('keyup', () =>
+{
+    calcular();
+});
+
+document.getElementById('frete').addEventListener('keyup', () =>
+{
+    calcular();
+});
+
+document.querySelector('button[type="submit"]').addEventListener('click', e =>
+{
+    e.preventDefault();
+
+    if (confirm('Você confirma esta ação?'))
+    {
+        const form = new FormData();
+
+        document.querySelectorAll('input').forEach(item =>
+        {
+            form.append(item.name, item.value);
+        });
+
+        document.querySelectorAll('select').forEach(item =>
+        {
+            if (item.checkValidity())
+            {
+                form.append(item.name, item.value);
+            }
+            else
+            {
+                alert(item.validationMessage);
+            }
+        });
+
+        fetch('api/v1/pedido',
+        {
+            body: form,
+            method: 'post'
+        })
+        .then(response =>
+        {
+            if (!response.ok)
+            {
+                throw new Error(response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(json =>
+        {
+            notification(json.status, {success: 'Pedido criado com sucesso.', failure: 'Falha ao criar pedido.'});
+
+            if (json.status == 'success')
+            {
+                carrinho = {};
+
+                document.querySelectorAll('input[type="number"], input[type="tel"], input[type="text"], select').forEach(item =>
+                {
+                    item.value = '';
+                });
+            }
+        })
+        .catch(error =>
+        {
+            console.error('Erro ao carregar:', error);
+        });
+    }
+});
+
+</script>
+    
+</body>
+</html>
