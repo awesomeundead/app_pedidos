@@ -50,19 +50,19 @@
         <div class="flex_rows">
             <div class="flex_columns">
                 <div class="gap">
-                    <label>Subtotal (R$)</label>
+                    <label for="subtotal">Subtotal (R$)</label>
                     <input class="short" id="subtotal" name="subtotal" readonly="readonly" type="number" />
                 </div>
                 <div class="gap">
-                    <label>Desconto (R$)</label>
+                    <label for="desconto" >Desconto (R$)</label>
                     <input class="short" id="desconto" min="0" name="desconto" step=".01" type="number" />
                 </div>
                 <div class="gap">
-                    <label>Frete (R$)</label>
+                    <label for="frete">Frete (R$)</label>
                     <input class="short" id="frete" min="0" name="frete" step=".01" type="number" />
                 </div>
                 <div class="gap">
-                    <label>Total (R$)</label>
+                    <label for="total">Total (R$)</label>
                     <input class="short" id="total" name="total" readonly="readonly" type="number" />
                 </div>
             </div>
@@ -80,22 +80,131 @@
 
 <script>
 
-fetch('api/v1/produtos')
-.then(response => 
+function adicionar_carrinho(item)
 {
-    if (!response.ok)
+    const item_id = item.dataset.itemQuantidade;
+
+    let item_preco = parseFloat(document.querySelector(`[data-item-preco="${item_id}"]`).value);
+    let item_preco_desconto = parseFloat(document.querySelector(`[data-item-preco-desconto="${item_id}"]`).value);
+
+    if (item_preco_desconto > 0)
     {
-        throw new Error(response.statusText);
+        item_preco = item_preco_desconto;
     }
 
-    return response.json();
-})
-.then(json =>
+    let subtotal = item_preco * item.value;
+
+    carrinho[`item${item_id}`] = {
+        "id": item_id,
+        "subtotal": subtotal
+    }
+
+    calcular();
+}
+
+function calcular()
+{
+    let subtotal = 0;
+
+    for (const property in carrinho)
+    {
+        subtotal += carrinho[property]['subtotal'];
+    }
+
+    let desconto = document.getElementById('desconto').value;
+    let frete = document.getElementById('frete').value;
+
+    if (desconto.trim() === '')
+    {
+        desconto = 0;
+    }
+
+    if (frete.trim() === '')
+    {
+        frete = 0;
+    }
+
+    desconto = parseFloat(desconto);
+    frete = parseFloat(frete);
+    let total = (subtotal - desconto) + frete;
+
+    document.getElementById('subtotal').value = subtotal.toFixed(2);
+    document.getElementById('total').value = total.toFixed(2);
+}
+
+function buscarProdutos(url)
+{
+    fetch(url)
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        renderizarProdutos(json.produtos);
+
+        document.querySelectorAll('input[name="itens_quantidade[]"]').forEach(item =>
+        {        
+            item.addEventListener('input', () =>
+            {
+                adicionar_carrinho(item);
+            });
+        });
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function enviarPedido(url, body)
+{
+    fetch(url,
+    {
+        body: body,
+        method: 'post'
+    })
+    .then(response =>
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        notification(json.status, {success: 'Pedido criado com sucesso.', failure: 'Falha ao criar pedido.'});
+
+        if (json.status == 'success')
+        {
+            carrinho = {};
+
+            buscarProdutos('api/v1/produtos');
+        }
+
+        document.querySelector('button[type="submit"]').disabled = false;
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function renderizarProdutos(produtos)
 {
     const container = document.getElementById('produtos');
     const template = document.querySelector('template');
 
-    json.produtos.forEach(item =>
+    container.innerHTML = '';
+
+    produtos.forEach(item =>
     {
         const clone = template.content.cloneNode(true);
         const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
@@ -123,81 +232,12 @@ fetch('api/v1/produtos')
 
         container.appendChild(clone);
     });
-
-    document.querySelectorAll('input[name="itens_quantidade[]"]').forEach(item =>
-    {        
-        item.addEventListener('change', () =>
-        {
-            adicionar_carrinho(item);
-        });
-
-        item.addEventListener('keyup', () =>
-        {
-            adicionar_carrinho(item);
-        });
-    });
-})
-.catch(error =>
-{
-    console.error('Erro ao carregar:', error);
-});
-
-logradouros();
-
-function adicionar_carrinho(item)
-{
-    item_id = item.dataset.itemQuantidade;
-
-    item_preco = document.querySelector(`[data-item-preco="${item_id}"]`).value;
-    item_preco_desconto = document.querySelector(`[data-item-preco-desconto="${item_id}"]`).value;
-
-    if (item_preco_desconto > 0)
-    {
-        item_preco = item_preco_desconto;
-        console.log(item_preco_desconto);
-    }
-
-    subtotal = item_preco * item.value;
-
-    carrinho[`item${item_id}`] = {
-        "id": item_id,
-        "subtotal": subtotal
-    }
-
-    calcular();
-}
-
-function calcular()
-{
-    var subtotal = 0;
-
-    for (const property in carrinho)
-    {
-        subtotal += carrinho[property]['subtotal'];
-    }
-
-    document.getElementById('subtotal').value = subtotal.toFixed(2);
-    desconto = document.getElementById('desconto').value;
-    frete = document.getElementById('frete').value;
-
-    if (desconto.trim() === '')
-    {
-        desconto = 0;
-    }
-
-    if (frete.trim() === '')
-    {
-        frete = 0;
-    }
-
-    desconto = parseFloat(desconto);
-    frete = parseFloat(frete);
-    total = (subtotal - desconto) + frete;
-
-    document.getElementById('total').value = total.toFixed(2);
 }
 
 var carrinho = {};
+
+buscarProdutos('api/v1/produtos');
+logradouros();
 
 document.getElementById('desconto').addEventListener('keyup', () =>
 {
@@ -212,17 +252,14 @@ document.getElementById('frete').addEventListener('keyup', () =>
 document.querySelector('button[type="submit"]').addEventListener('click', e =>
 {
     e.preventDefault();
+    e.target.disabled = true;
 
     if (confirm('Você confirma esta ação?'))
     {
         const form = new FormData();
+        let validation;
 
-        document.querySelectorAll('input').forEach(item =>
-        {
-            form.append(item.name, item.value);
-        });
-
-        document.querySelectorAll('select').forEach(item =>
+        document.querySelectorAll('input, select').forEach(item =>
         {
             if (item.checkValidity())
             {
@@ -230,42 +267,14 @@ document.querySelector('button[type="submit"]').addEventListener('click', e =>
             }
             else
             {
-                alert(item.validationMessage);
+                validation = item.validationMessage;
             }
         });
 
-        fetch('api/v1/pedido',
+        if (validation == undefined)
         {
-            body: form,
-            method: 'post'
-        })
-        .then(response =>
-        {
-            if (!response.ok)
-            {
-                throw new Error(response.statusText);
-            }
-
-            return response.json();
-        })
-        .then(json =>
-        {
-            notification(json.status, {success: 'Pedido criado com sucesso.', failure: 'Falha ao criar pedido.'});
-
-            if (json.status == 'success')
-            {
-                carrinho = {};
-
-                document.querySelectorAll('input[type="number"], input[type="tel"], input[type="text"], select').forEach(item =>
-                {
-                    item.value = '';
-                });
-            }
-        })
-        .catch(error =>
-        {
-            console.error('Erro ao carregar:', error);
-        });
+            enviarPedido('api/v1/pedido', form); 
+        }
     }
 });
 
