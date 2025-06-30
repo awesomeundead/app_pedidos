@@ -1,5 +1,7 @@
 <?php
 
+header('Content-Type: application/json; charset=utf-8');
+
 require ROOT_DIR . '/pdo.php';
 
 $query = "SELECT endereco FROM pedidos GROUP BY endereco";
@@ -17,8 +19,6 @@ foreach ($listing as $item)
     }
 }
 
-$result['logradouros'] = $endereco;
-
-header('Content-Type: application/json; charset=utf-8');
+$result['logradouros'] = array_values(array_unique($endereco));
 
 echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

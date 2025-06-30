@@ -6,6 +6,23 @@
 <title>Pedidos</title>
 <link href="layout.css" rel="stylesheet" />
 <link href="default.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<style>
+
+.flatpickr-calendar
+{
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+}
+
+</style>
 </head>
 <body>
 
@@ -37,54 +54,13 @@
     </main>
     <footer>
         <div class="flex_columns">
-            <form>
-                <label>Data: <input name="data" type="date" /></label>
-                <button type="submit">Aplicar</button>
-            </form>
-            <form>
-                <label>Mês: <input name="data" type="month" /></label>
-                <button type="submit">Aplicar</button>
-            </form>
+            <button id="datepicker_date">Buscar por data</button>
+            <button id="datepicker_month">Buscar por mês</button>
         </div>
     </footer>
 </div>
 
 <script>
-
-const query = new URLSearchParams(window.location.search);
-let url = 'api/v1/pedidos';
-
-if (query.has('data'))
-{
-    url += `?data=${query.get('data')}`;
-}
-else if (query.has('tel'))
-{
-    url += `/cliente?tel=${query.get('tel')}`;
-}
-else
-{
-    url += '?data=' + new Date().toLocaleDateString('sv-SE');
-}
-
-buscarPedidos(url);
-
-document.querySelectorAll('form').forEach(item =>
-{
-    item.addEventListener('submit', e =>
-    {
-        e.preventDefault();
-
-        const params = new URLSearchParams(new FormData(item));
-        const url = `api/v1/pedidos?${params.toString()}`;
-
-        const novaURL = new URL(window.location);
-        novaURL.search = params.toString();
-        window.history.replaceState({}, '', novaURL);
-
-        buscarPedidos(url);
-    });
-});
 
 function buscarPedidos(url)
 {
@@ -148,6 +124,62 @@ function renderizarPedidos(pedidos)
         container.appendChild(clone);
     });
 }
+
+function atualizarURL(data)
+{
+    const url = `api/v1/pedidos?data=${data}`;
+    const novaURL = new URL(window.location);
+
+    novaURL.search = url;
+    window.history.replaceState({}, '', novaURL);
+
+    buscarPedidos(url);
+}
+
+const query = new URLSearchParams(window.location.search);
+let url = 'api/v1/pedidos';
+
+if (query.has('data'))
+{
+    url += `?data=${query.get('data')}`;
+}
+else if (query.has('tel'))
+{
+    url += `/cliente?tel=${query.get('tel')}`;
+}
+else
+{
+    url += '?data=' + new Date().toLocaleDateString('sv-SE');
+}
+
+buscarPedidos(url);
+
+const date = flatpickr("#datepicker_date",
+{
+    disableMobile: true,
+    locale: 'pt',
+    onChange: function(selectedDates, dateStr, instance)
+    {
+        atualizarURL(dateStr);
+    }
+});
+
+const month = flatpickr("#datepicker_month",
+{
+    disableMobile: true,
+    locale: 'pt',
+    plugins: [
+        new monthSelectPlugin(
+        {
+            shorthand: true,
+            dateFormat: "Y-m"
+        })
+    ],
+    onChange: function(selectedDates, dateStr, instance)
+    {
+        atualizarURL(dateStr);
+    }
+});
 
 </script>
     
