@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendas</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
+<link rel="manifest" href="public/site.webmanifest">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Hoje</a>
+            <a href="novo.html">Novo pedido</a>
+        </nav>
+    </header>
+    <main>
+        <canvas id="grafico"></canvas>
+    </main>
+    <footer>
+
+    </footer>
+</div>
+
+<script>
+
+function buscarVendas(url)
+{
+    if (!query.has('key'))
+    {
+        return;
+    }
+
+    const key = query.get('key');
+
+    fetch(url,
+    {
+        headers:
+        {
+            'Authorization': `ApiKey ${key}`
+        }
+    })
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        gerarGrafico(json);
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function gerarGrafico(json)
+{
+    new Chart(container,
+    {
+        type: 'bar',
+        data:
+        {
+            labels: json.map(row => 
+            {
+                return new Intl.DateTimeFormat('pt-BR', {weekday: 'long', day: 'numeric'}).format(new Date(row.data + 'T00:00:00'));
+            }),
+            datasets: [{
+                label: 'Valor no dia',
+                data: json.map(row => row.total),
+                borderWidth: 1
+            }]
+        },
+        options:
+        {
+            plugins:
+            {
+                tooltip:
+                {
+                    callbacks:
+                    {
+                        label: (context) =>
+                        {
+                            return new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {y: {beginAtZero: true}}
+        }
+    });
+}
+
+const container = document.getElementById('grafico');
+
+const query = new URLSearchParams(window.location.search);
+let url = 'api/v1/vendas/dia';
+
+if (query.has('data'))
+{
+    url += `?data=${query.get('data')}`;
+}
+else
+{
+    url += '?data=' + new Date().toISOString().slice(0, 7);
+}
+
+buscarVendas(url);
+
+</script>
+    
+</body>
+</html>

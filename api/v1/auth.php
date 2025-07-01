@@ -1,18 +1,20 @@
 <?php
 
-$headers = apache_request_headers();
-$authHeader = $headers['Authorization'] ?? '';
+$apikey = (require '../../config.php')['apikey'];
 
-if (!preg_match('/ApiKey\s(\S+)/', $authHeader, $matches))
+$headers = apache_request_headers();
+$auth_header = $headers['Authorization'] ?? '';
+
+if (!preg_match('/ApiKey\s(\S+)/', $auth_header, $matches))
 {
     http_response_code(401);
     echo json_encode(['erro' => 'API Key não fornecida'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-$apiKey = $matches[1];
+$auth_header_apikey = $matches[1];
 
-if ($apiKey !== '0123456789')
+if ($apikey !== $auth_header_apikey)
 {
     http_response_code(403);
     echo json_encode(['erro' => 'API Key inválida'], JSON_UNESCAPED_UNICODE);

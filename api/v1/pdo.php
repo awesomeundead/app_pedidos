@@ -1,6 +1,10 @@
 <?php
 
-require '../../config.php';
+$config = (require '../../config.php')['pdo'];
+
+$dsn = $config['dsn'];
+$username = $config['username'];
+$password = $config['password'];
 
 try
 {

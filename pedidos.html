@@ -131,13 +131,12 @@ function renderizarPedidos(pedidos)
 
 function atualizarURL(data)
 {
-    const url = `api/v1/pedidos?data=${data}`;
     const novaURL = new URL(window.location);
 
-    novaURL.search = url;
+    novaURL.search = `data=${data}`;
     window.history.replaceState({}, '', novaURL);
 
-    buscarPedidos(url);
+    buscarPedidos(`api/v1/pedidos?data=${data}`);
 }
 
 const query = new URLSearchParams(window.location.search);
