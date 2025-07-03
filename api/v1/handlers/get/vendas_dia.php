@@ -2,7 +2,6 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-require ROOT_DIR . '/auth.php';
 require ROOT_DIR . '/pdo.php';
 
 $data = $_GET['data'] ?? '';

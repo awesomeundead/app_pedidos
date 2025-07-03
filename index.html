@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendas</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
+<link rel="manifest" href="public/site.webmanifest">
+<style>
+
+
+</style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="novo.html">Novo pedido</a>
+        </nav>
+    </header>
+    <main>
+        <input id="apikey" type="text" />
+        <button>Adicionar</button>
+    </main>
+    <footer>
+
+    </footer>
+</div>
+
+<script>
+
+document.querySelector('button').addEventListener('click', () =>
+{
+    const apikey = document.querySelector('#apikey').value;
+    const regex = /^[a-fA-F0-9]{32}$/;
+
+    if (regex.test(apikey))
+    {
+        localStorage.setItem('apikey', apikey);
+        window.location.href = 'pedidos.html';
+    }
+});
+
+</script>
+    
+</body>
+</html>

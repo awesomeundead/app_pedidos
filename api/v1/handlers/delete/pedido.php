@@ -1,5 +1,7 @@
 <?php
 
+header('Content-Type: application/json; charset=utf-8');
+
 require ROOT_DIR . '/pdo.php';
 
 $id = $vars['id'];
@@ -17,8 +19,6 @@ if ($result)
     $stmt = $pdo->prepare($query);
     $result = $stmt->execute($params);
 }
-
-header('Content-Type: application/json; charset=utf-8');
 
 $json['status'] = $result ? 'success' : 'failure';
 

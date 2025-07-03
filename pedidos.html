@@ -15,6 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="auth.js"></script>
 <style>
 
 .flatpickr-calendar
@@ -35,6 +36,7 @@
         <nav>
             <a href="pedidos.html">Hoje</a>
             <a href="novo.html">Novo pedido</a>
+            <a href="vendas.html">Vendas</a>
         </nav>
     </header>
     <main>
@@ -68,7 +70,13 @@
 
 function buscarPedidos(url)
 {
-    fetch(url)
+    fetch(url, 
+    {
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`
+        }
+    })
     .then(response => 
     {
         if (!response.ok)
@@ -90,9 +98,6 @@ function buscarPedidos(url)
 
 function renderizarPedidos(pedidos)
 {
-    const container = document.getElementById('pedidos');
-    const template = document.querySelector('template');
-
     container.innerHTML = '';
 
     pedidos.forEach(item =>
@@ -139,6 +144,8 @@ function atualizarURL(data)
     buscarPedidos(`api/v1/pedidos?data=${data}`);
 }
 
+const container = document.getElementById('pedidos');
+const template = document.querySelector('template');
 const query = new URLSearchParams(window.location.search);
 let url = 'api/v1/pedidos';
 

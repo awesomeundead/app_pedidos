@@ -10,14 +10,31 @@
 <link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
 <link rel="manifest" href="public/site.webmanifest">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="auth.js"></script>
+<style>
+
+.flatpickr-calendar
+{
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+}
+
+</style>
 </head>
 <body>
 
 <div id="app">
     <header>
         <nav>
-            <a href="pedidos.html">Hoje</a>
+            <a href="pedidos.html">Pedidos</a>
             <a href="novo.html">Novo pedido</a>
         </nav>
     </header>
@@ -25,26 +42,29 @@
         <canvas id="grafico"></canvas>
     </main>
     <footer>
-
+        <div class="flex_columns">
+            <button id="datepicker_month">Buscar por mês</button>
+        </div>
     </footer>
 </div>
 
 <script>
 
+function atualizarURL(data)
+{
+    const url = new URL(window.location);
+
+    url.search = `data=${data}`;
+    window.location.href = url;
+}
+
 function buscarVendas(url)
 {
-    if (!query.has('key'))
-    {
-        return;
-    }
-
-    const key = query.get('key');
-
     fetch(url,
     {
         headers:
         {
-            'Authorization': `ApiKey ${key}`
+            'Authorization': `ApiKey ${apikey}`
         }
     })
     .then(response => 
@@ -68,6 +88,8 @@ function buscarVendas(url)
 
 function gerarGrafico(json)
 {
+    container.innerHTML = '';
+
     new Chart(container,
     {
         type: 'bar',
@@ -98,7 +120,20 @@ function gerarGrafico(json)
                     }
                 }
             },
-            scales: {y: {beginAtZero: true}}
+            scales:
+            {
+                y:
+                {
+                    beginAtZero: true,
+                    ticks:
+                    {
+                        callback: function(value)
+                        {
+                            return new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(value);
+                        }
+                    }
+                }
+            }
         }
     });
 }
@@ -118,6 +153,23 @@ else
 }
 
 buscarVendas(url);
+
+const month = flatpickr("#datepicker_month",
+{
+    disableMobile: true,
+    locale: 'pt',
+    plugins: [
+        new monthSelectPlugin(
+        {
+            shorthand: true,
+            dateFormat: "Y-m"
+        })
+    ],
+    onChange: function(selectedDates, dateStr, instance)
+    {
+        atualizarURL(dateStr);
+    }
+});
 
 </script>
     

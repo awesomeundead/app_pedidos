@@ -11,6 +11,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
 <link rel="manifest" href="public/site.webmanifest">
 <script src="default.js"></script>
+<script src="auth.js"></script>
 </head>
 <body>
 
@@ -18,6 +19,7 @@
     <header>
         <nav>
             <a href="pedidos.html">Pedidos</a>
+            <a href="vendas.html">Vendas</a>
         </nav>
         <div class="identificacao">
             <input name="nome" placeholder="Nome" type="text" />
@@ -138,7 +140,13 @@ function calcular()
 
 function buscarProdutos(url)
 {
-    fetch(url)
+    fetch(url, 
+    {
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`
+        }
+    })
     .then(response => 
     {
         if (!response.ok)
@@ -171,6 +179,10 @@ function enviarPedido(url, body)
     fetch(url,
     {
         body: body,
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`
+        },
         method: 'post'
     })
     .then(response =>
