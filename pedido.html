@@ -20,14 +20,15 @@
         <nav>
             <a href="pedidos.html">Pedidos</a>
             <a href="novo.html">Novo pedido</a>
+            <a href="produtos.html">Produtos</a>
             <a href="vendas.html">Vendas</a>
         </nav>
         <div class="flex_rows">
-            <div class="flex_columns">
+            <div class="flex_columns space_between">
                 <div>ID:</div>
                 <div class="input_id"></div>
             </div>
-            <div class="flex_columns">
+            <div class="flex_columns space_between">
                 <div>Data:</div>
                 <div class="input_data"></div>
             </div>
@@ -57,20 +58,20 @@
     </main>
     <footer>
         <div class="flex_rows">
-            <div class="flex_columns">
-                <div class="gap">
+            <div class="flex_columns space_between">
+                <div class="flex_rows">
                     <label for="subtotal">Subtotal (R$)</label>
                     <input class="short" id="subtotal" name="subtotal" readonly="readonly" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="desconto">Desconto (R$)</label>
                     <input class="short" id="desconto" min="0" name="desconto" step=".01" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="frete">Frete (R$)</label>
                     <input class="short" id="frete" min="0" name="frete" step=".01" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="total">Total (R$)</label>
                     <input class="short" id="total" name="total" readonly="readonly" type="number" />
                 </div>
@@ -138,36 +139,7 @@ function buscarProdutos(url)
     })
     .then(json =>
     {
-        const container = document.getElementById('produtos');
-        const data = new Intl.DateTimeFormat('pt-BR', {day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric'}).format(new Date(json.data));
-
-        document.querySelector('.input_id').textContent = json.id;
-        document.querySelector('.input_data').textContent = data;
-        document.querySelector('input[name="nome"]').value = json.nome;
-        document.querySelector('input[name="telefone"]').value = json.telefone;
-        document.querySelector('input[name="endereco"]').value = json.endereco;
-        document.querySelector('input[name="subtotal"]').value = json.subtotal;
-        document.querySelector('input[name="desconto"]').value = json.desconto;
-        document.querySelector('input[name="frete"]').value = json.frete;
-        document.querySelector('input[name="total"]').value = json.total;
-        document.querySelector('select[name="pagamento"]').value = json.pagamento;
-        document.querySelector('select[name="status"]').value = json.status;
-
-        const template = document.querySelector('template');
-
-        json.itens.forEach(item =>
-        {
-            const clone = template.content.cloneNode(true);
-            const subtotal = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.subtotal);
-            const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
-
-            clone.querySelector('.imagem img').src = `imagens/${imagem}`;
-            clone.querySelector('.nome').textContent = item.nome;
-            clone.querySelector('.quantidade').textContent = `Quantidade: ${item.quantidade}`;
-            clone.querySelector('.subtotal').textContent = subtotal;
-
-            container.appendChild(clone);
-        });
+        renderizarProdutos(json);
     })
     .catch(error =>
     {
@@ -205,6 +177,40 @@ function atualizarPedido(url, body)
     .catch(error =>
     {
         console.error('Erro ao carregar:', error);
+    });
+}
+
+function renderizarProdutos(json)
+{
+    const container = document.getElementById('produtos');
+    const data = new Intl.DateTimeFormat('pt-BR', {day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric'}).format(new Date(json.data));
+
+    document.querySelector('.input_id').textContent = json.id;
+    document.querySelector('.input_data').textContent = data;
+    document.querySelector('input[name="nome"]').value = json.nome;
+    document.querySelector('input[name="telefone"]').value = json.telefone;
+    document.querySelector('input[name="endereco"]').value = json.endereco;
+    document.querySelector('input[name="subtotal"]').value = json.subtotal;
+    document.querySelector('input[name="desconto"]').value = json.desconto;
+    document.querySelector('input[name="frete"]').value = json.frete;
+    document.querySelector('input[name="total"]').value = json.total;
+    document.querySelector('select[name="pagamento"]').value = json.pagamento;
+    document.querySelector('select[name="status"]').value = json.status;
+
+    const template = document.querySelector('template');
+
+    json.itens.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const subtotal = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.subtotal);
+        const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+
+        clone.querySelector('.imagem img').src = `imagens/${imagem}`;
+        clone.querySelector('.nome').textContent = item.nome;
+        clone.querySelector('.quantidade').textContent = `Quantidade: ${item.quantidade}`;
+        clone.querySelector('.subtotal').textContent = subtotal;
+
+        container.appendChild(clone);
     });
 }
 

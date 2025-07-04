@@ -16,7 +16,10 @@ return function(RouteCollector $route)
     // Query String tel={telefone}
     $route->get('/pedidos/cliente', 'handlers/get/pedidos_cliente.php');
 
+    // Query String | disponibilidade={0 || 1}
     $route->get('/produtos', 'handlers/get/produtos.php');
+
+    $route->put('/produto/{id:\d+}', 'handlers/put/produto.php');
 
     // Query String | data={YYYY-MM}
     $route->get('/vendas', 'handlers/get/vendas.php');

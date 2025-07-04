@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produtos</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
+<link rel="manifest" href="public/site.webmanifest">
+<script src="default.js"></script>
+<script src="auth.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="novo.html">Novo pedido</a>
+            <a href="vendas.html">Vendas</a>
+        </nav>
+
+    </header>
+    <main>
+        <dialog>
+            <form>
+                <div class="flex_rows">
+                    <input name="id" type="hidden" />
+                    <label class="flex_columns">
+                        Disponível:
+                        <input name="disponibilidade" type="checkbox" />
+                    </label>
+                    <label class="flex_rows">
+                        Nome:
+                        <input name="nome" placeholder="Nome" type="text" />
+                    </label>
+                    <label class="flex_rows">
+                        Categoria:
+                        <input name="categoria" placeholder="Categoria" type="text" />
+                    </label>
+                    <label class="flex_rows">
+                        Imagem:
+                        <input name="imagem" placeholder="Imagem" type="text" />
+                    </label>
+                    <div class="flex_columns">
+                        <label class="flex_rows">
+                            Preço:
+                            <input min="0" name="preco" placeholder="Preço" step=".01" type="number" />
+                        </label>
+                        <label class="flex_rows">
+                            Preço com desconto:
+                            <input min="0" name="preco_desconto" placeholder="Desconto" step=".01" type="number" />
+                        </label>
+                    </div>
+                    <button type="submit">Atualizar</button>
+                    <button class="fechar" type="button">Fechar</button>
+                </div>
+            </form>
+        </dialog>
+        <template>
+            <div class="item">
+                <div>
+                    <div class="imagem">
+                        <img alt="" src="" />
+                    </div>
+                </div>
+                <div class="flex_rows">
+                    <div class="nome"></div>
+                    <div>
+                        <button class="editar" type="button">Editar</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <div id="produtos"></div>
+    </main>
+    <footer>
+  
+    </footer>
+</div>
+
+<script>
+
+function atualizarProduto(body)
+{
+    fetch(`api/v1/produto/${body['id']}`,
+    {
+        body: JSON.stringify(body),
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`,
+            'Content-Type': 'application/json'
+        },
+        method: 'put'
+    })
+    .then(response =>
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        notification(json.status, {success: 'Atualizado com sucesso.', failure: 'Falha ao atualizar.'});
+
+        document.querySelector('button[type="submit"]').disabled = false;
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function buscarProdutos()
+{
+    fetch('api/v1/produtos',
+    {
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`
+        }
+    })
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        renderizarProdutos(json.produtos);
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function renderizarProdutos(produtos)
+{
+    const container = document.getElementById('produtos');
+    const template = document.querySelector('template');
+
+    container.innerHTML = '';
+
+    produtos.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+
+        clone.querySelector('.imagem img').src = `imagens/${imagem}`;        
+        clone.querySelector('.nome').textContent = item.nome;
+
+        clone.querySelector('.editar').addEventListener('click', () =>
+        {
+            form.id.value = item.id;
+            form.nome.value = item.nome;
+            form.categoria.value = item.categoria;
+            form.imagem.value = item.imagem;
+            form.preco.value = item.preco;
+            form.preco_desconto.value = item.preco_desconto;
+            form.disponibilidade.checked = !!item.disponibilidade;
+            
+            dialog.showModal();
+        });
+
+        container.appendChild(clone);
+    });
+}
+
+const dialog = document.querySelector('dialog');
+const form = dialog.querySelector('form');
+
+document.querySelector('.fechar').addEventListener('click', () =>
+{
+    dialog.close();
+});
+
+form.addEventListener('submit', e =>
+{
+    e.preventDefault();
+
+    const body = Object.fromEntries(new FormData(form));
+
+    body['disponibilidade'] = form.disponibilidade.checked ? '1' : '0';
+
+    console.log(body);
+
+    atualizarProduto(body);
+    dialog.close();
+});
+
+buscarProdutos();
+
+</script>
+    
+</body>
+</html>

@@ -19,6 +19,7 @@
     <header>
         <nav>
             <a href="pedidos.html">Pedidos</a>
+            <a href="produtos.html">Produtos</a>
             <a href="vendas.html">Vendas</a>
         </nav>
         <div class="identificacao">
@@ -28,7 +29,7 @@
         </div>
     </header>
     <main>
-        <div class="flex_columns">
+        <div class="flex_columns space_between">
             <div>Selecione os itens</div>
             <div>Quantidade</div>
         </div>
@@ -54,20 +55,20 @@
     </main>
     <footer>
         <div class="flex_rows">
-            <div class="flex_columns">
-                <div class="gap">
+            <div class="flex_columns space_between">
+                <div class="flex_rows">
                     <label for="subtotal">Subtotal (R$)</label>
                     <input class="short" id="subtotal" name="subtotal" readonly="readonly" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="desconto" >Desconto (R$)</label>
                     <input class="short" id="desconto" min="0" name="desconto" step=".01" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="frete">Frete (R$)</label>
                     <input class="short" id="frete" min="0" name="frete" step=".01" type="number" />
                 </div>
-                <div class="gap">
+                <div class="flex_rows">
                     <label for="total">Total (R$)</label>
                     <input class="short" id="total" name="total" readonly="readonly" type="number" />
                 </div>
@@ -138,9 +139,9 @@ function calcular()
     document.getElementById('total').value = total.toFixed(2);
 }
 
-function buscarProdutos(url)
+function buscarProdutos()
 {
-    fetch(url, 
+    fetch('api/v1/produtos?disponibilidade=1', 
     {
         headers:
         {
@@ -202,7 +203,7 @@ function enviarPedido(url, body)
         {
             carrinho = {};
 
-            buscarProdutos('api/v1/produtos');
+            buscarProdutos();
         }
 
         document.querySelector('button[type="submit"]').disabled = false;
@@ -252,7 +253,7 @@ function renderizarProdutos(produtos)
 
 var carrinho = {};
 
-buscarProdutos('api/v1/produtos');
+buscarProdutos();
 logradouros();
 
 document.getElementById('desconto').addEventListener('keyup', () =>

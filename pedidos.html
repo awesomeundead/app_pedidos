@@ -36,13 +36,14 @@
         <nav>
             <a href="pedidos.html">Hoje</a>
             <a href="novo.html">Novo pedido</a>
+            <a href="produtos.html">Produtos</a>
             <a href="vendas.html">Vendas</a>
         </nav>
     </header>
     <main>
         <template>
             <div class="item flex_rows">
-                <div class="flex_columns">
+                <div class="flex_columns space_between">
                     <div class="data"></div>
                     <a class="editar" href="">Editar</a>
                 </div>
@@ -50,7 +51,7 @@
                     <a href=""></a>
                 </div>
                 <div class="endereco"></div>
-                <div class="flex_columns">
+                <div class="flex_columns space_between">
                     <div class="total"></div>
                     <div class="status"></div>
                 </div>
@@ -59,7 +60,7 @@
         <div id="pedidos"></div>
     </main>
     <footer>
-        <div class="flex_columns">
+        <div class="flex_columns space_between">
             <button id="datepicker_date">Buscar por data</button>
             <button id="datepicker_month">Buscar por mês</button>
         </div>
