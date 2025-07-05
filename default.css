@@ -90,26 +90,6 @@
     width: 64px;
 }
 
-#produtos_lista
-{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-#produtos_lista .item
-{
-    display: grid;
-    gap: 5px;
-    grid-template-columns: auto auto 1fr;
-}
-
-#produtos_lista .item .imagem img
-{
-    border-radius: 5px;
-    width: 64px;
-}
-
 #pedidos
 {
     display: flex;

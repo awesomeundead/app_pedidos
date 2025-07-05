@@ -34,27 +34,29 @@
                         <input name="disponibilidade" type="checkbox" />
                     </label>
                     <label class="flex_rows">
+                        Categoria:
+                        <input name="categoria" placeholder="Categoria" type="text" />
+                    </label>
+                    <label class="flex_rows">
                         Nome:
                         <input name="nome" placeholder="Nome" type="text" />
                     </label>
                     <label class="flex_rows">
-                        Categoria:
-                        <input name="categoria" placeholder="Categoria" type="text" />
+                        Descrição:
+                        <textarea cols="30" name="descricao" placeholder="Categoria" rows="4"></textarea>
                     </label>
                     <label class="flex_rows">
                         Imagem:
                         <input name="imagem" placeholder="Imagem" type="text" />
                     </label>
-                    <div class="flex_columns">
-                        <label class="flex_rows">
-                            Preço:
-                            <input min="0" name="preco" placeholder="Preço" step=".01" type="number" />
-                        </label>
-                        <label class="flex_rows">
-                            Preço com desconto:
-                            <input min="0" name="preco_desconto" placeholder="Desconto" step=".01" type="number" />
-                        </label>
-                    </div>
+                    <label class="flex_rows">
+                        Preço:
+                        <input min="0" name="preco" placeholder="Preço" step=".01" type="number" />
+                    </label>
+                    <label class="flex_rows">
+                        Preço com desconto:
+                        <input min="0" name="preco_desconto" placeholder="Desconto" step=".01" type="number" />
+                    </label>
                     <button type="submit">Atualizar</button>
                     <button class="fechar" type="button">Fechar</button>
                 </div>
@@ -69,9 +71,10 @@
                 </div>
                 <div class="flex_rows">
                     <div class="nome"></div>
-                    <div>
-                        <button class="editar" type="button">Editar</button>
-                    </div>
+                    <div class="preco"></div>
+                </div>
+                <div class="flex_columns space_between">
+                    <button class="editar" type="button">Editar</button>
                 </div>
             </div>
         </template>
@@ -156,15 +159,18 @@ function renderizarProdutos(produtos)
     {
         const clone = template.content.cloneNode(true);
         const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+        const preco = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.preco)
 
         clone.querySelector('.imagem img').src = `imagens/${imagem}`;        
         clone.querySelector('.nome').textContent = item.nome;
+        clone.querySelector('.preco').textContent = preco;
 
         clone.querySelector('.editar').addEventListener('click', () =>
         {
             form.id.value = item.id;
-            form.nome.value = item.nome;
             form.categoria.value = item.categoria;
+            form.nome.value = item.nome;
+            form.descricao.value = item.descricao;
             form.imagem.value = item.imagem;
             form.preco.value = item.preco;
             form.preco_desconto.value = item.preco_desconto;

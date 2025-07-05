@@ -9,8 +9,9 @@ $id = $vars['id'];
 $content = trim(file_get_contents('php://input'));
 $_PUT = json_decode($content, true);
 
-$nome = trim($_PUT['nome'] ?? '');
 $categoria = trim($_PUT['categoria'] ?? '');
+$nome = trim($_PUT['nome'] ?? '');
+$descricao = trim($_PUT['descricao'] ?? '');
 $imagem = trim($_PUT['imagem'] ?? '');
 $disponibilidade = $_PUT['disponibilidade'] ?? '0';
 $preco = $_PUT['preco'] ?? '';
@@ -24,6 +25,7 @@ if (empty($preco_desconto))
 $query = 'UPDATE produtos SET
           categoria = :categoria,
           nome = :nome,
+          descricao = :descricao,
           preco = :preco,
           preco_desconto = :preco_desconto,
           disponibilidade = :disponibilidade,
@@ -34,6 +36,7 @@ $params = [
     'id' => $id,
     'categoria' => $categoria,
     'nome' => $nome,
+    'descricao' => $descricao,
     'preco' => $preco,
     'preco_desconto' => $preco_desconto,
     'disponibilidade' => $disponibilidade,
