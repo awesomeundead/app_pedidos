@@ -21,7 +21,7 @@
             <a href="pedidos.html">Pedidos</a>
             <a href="novo.html">Novo pedido</a>
             <a href="produtos.html">Produtos</a>
-            <a href="vendas.html">Vendas</a>
+            <a href="relatorio.html">Relatório de vendas</a>
         </nav>
         <div class="flex_rows">
             <div class="flex_columns space_between">
@@ -243,24 +243,13 @@ document.querySelector('button[type="submit"]').addEventListener('click', e =>
     if (confirm('Você confirma esta ação?'))
     {
         const body = {};
-        let validation;
 
         document.querySelectorAll('input, select').forEach(item =>
         {
-            if (item.checkValidity())
-            {
-                body[item.name] = item.value;
-            }
-            else
-            {
-                validation = item.validationMessage;
-            }
+            body[item.name] = item.value;
         });
 
-        if (validation == undefined)
-        {
-            atualizarPedido(`api/v1/pedido/${query.get('id')}`, body); 
-        }
+        atualizarPedido(`api/v1/pedido/${query.get('id')}`, body);
     }
 });
 

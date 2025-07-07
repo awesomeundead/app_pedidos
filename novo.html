@@ -20,7 +20,7 @@
         <nav>
             <a href="pedidos.html">Pedidos</a>
             <a href="produtos.html">Produtos</a>
-            <a href="vendas.html">Vendas</a>
+            <a href="relatorio.html">Relatório de vendas</a>
         </nav>
         <div class="identificacao">
             <input name="nome" placeholder="Nome" type="text" />
@@ -203,6 +203,11 @@ function enviarPedido(url, body)
         {
             carrinho = {};
 
+            document.querySelectorAll('input, select').forEach(item =>
+            {
+                item.value = '';
+            });
+
             buscarProdutos();
         }
 
@@ -291,6 +296,11 @@ document.querySelector('button[type="submit"]').addEventListener('click', e =>
         if (validation == undefined)
         {
             enviarPedido('api/v1/pedido', form); 
+        }
+        else
+        {
+            alert(validation);
+            e.target.disabled = false;
         }
     }
 });

@@ -13,17 +13,17 @@ return function(RouteCollector $route)
 
     // Query String | data={YYYY-MM || YYYY-MM-DD}
     $route->get('/pedidos', 'handlers/get/pedidos.php');
-    // Query String tel={telefone}
+    // Query String | tel={(\d{2}) \d{4,5}-\d{4}}
     $route->get('/pedidos/cliente', 'handlers/get/pedidos_cliente.php');
 
-    // Query String | disponibilidade={0 || 1}
+    // Query String | disponibilidade={0 || 1} [opcional]
     $route->get('/produtos', 'handlers/get/produtos.php');
 
     $route->put('/produto/{id:\d+}', 'handlers/put/produto.php');
 
-    // Query String | data={YYYY-MM}
+    // Query String | data={YYYY-MM || YYYY-MM-DD}
     $route->get('/vendas', 'handlers/get/vendas.php');
-    // query string tel={(\d{2}) \d{4,5}-\d{4}}
+    // Query String | tel={(\d{2}) \d{4,5}-\d{4}}
     $route->get('/vendas/cliente', 'handlers/get/vendas_cliente.php');
     // Query String | data={YYYY-MM}
     $route->get('/vendas/dia', 'handlers/get/vendas_dia.php');

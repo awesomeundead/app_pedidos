@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vendas</title>
+<title>Gráfico de vendas por dia</title>
 <link href="layout.css" rel="stylesheet" />
 <link href="default.css" rel="stylesheet" />
 <link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
@@ -12,43 +12,11 @@
 <link rel="manifest" href="public/site.webmanifest">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script src="auth.js"></script>
-<style>
-
-.flatpickr-calendar
-{
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 9999 !important;
-}
-
-#grafico_container
-{
-    height: 60vh;
-    position: relative;
-    width: 100%;
-}
-
-#grafico
-{
-    height: 100% !important;
-    width: 100% !important;
-}
-
-@media (max-width: 600px)
-{
-    #grafico_container
-    {
-        height: 30vh;
-    }
-}
-
-</style>
 </head>
 <body>
 
@@ -58,6 +26,7 @@
             <a href="pedidos.html">Pedidos</a>
             <a href="novo.html">Novo pedido</a>
             <a href="produtos.html">Produtos</a>
+            <a href="relatorio.html">Relatório de vendas</a>
         </nav>
     </header>
     <main>

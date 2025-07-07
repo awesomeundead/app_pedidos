@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de vendas</title>
+<link href="layout.css" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" />
+<link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="public/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="public/favicon-16x16.png">
+<link rel="manifest" href="public/site.webmanifest">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="auth.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <nav>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="novo.html">Novo pedido</a>
+            <a href="produtos.html">Produtos</a>
+            <a href="grafico.html">Gráfico</a>
+        </nav>
+        <div class="flex_rows">
+            <div class="flex_columns space_between">
+                <div>Subtotal:</div>
+                <div class="input_subtotal"></div>
+            </div>
+            <div class="flex_columns space_between">
+                <div>Desconto:</div>
+                <div class="input_desconto"></div>
+            </div>
+            <div class="flex_columns space_between">
+                <div>Frete:</div>
+                <div class="input_frete"></div>
+            </div>
+            <div class="flex_columns space_between">
+                <div>Total:</div>
+                <div class="input_total"></div>
+            </div>
+            <div class="flex_columns space_between">
+                <div>Dias:</div>
+                <div class="input_dias"></div>
+            </div>
+            <div class="flex_columns space_between pagamento">
+                <div class="tipo"></div>
+                <div class="valor"></div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <template>
+            <div class="item">
+                <div class="imagem">
+                    <img alt="" src="" />
+                </div>
+                <div>
+                    <div class="nome"></div>
+                    <div class="quantidade"></div>
+                </div>
+            </div>
+        </template>
+        <div id="produtos"></div>
+    </main>
+    <footer>
+        <div class="flex_columns space_between">
+            <button id="datepicker_date">Buscar por data</button>
+            <button id="datepicker_month">Buscar por mês</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+
+function atualizarURL(data)
+{
+    const url = new URL(window.location);
+
+    url.search = `data=${data}`;
+    window.location.href = url;
+}
+
+function buscarVendas(url)
+{
+    fetch(url,
+    {
+        headers:
+        {
+            'Authorization': `ApiKey ${apikey}`
+        }
+    })
+    .then(response => 
+    {
+        if (!response.ok)
+        {
+            throw new Error(response.statusText);
+        }
+
+        return response.json();
+    })
+    .then(json =>
+    {
+        renderizarProdutos(json);
+    })
+    .catch(error =>
+    {
+        console.error('Erro ao carregar:', error);
+    });
+}
+
+function renderizarProdutos(json)
+{
+    const container = document.getElementById('produtos');
+    const pagamento = document.querySelector('.pagamento');
+    const currency = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+
+    document.querySelector('.input_subtotal').textContent = currency.format(json.subtotal);
+    document.querySelector('.input_desconto').textContent = currency.format(json.desconto);
+    document.querySelector('.input_frete').textContent = currency.format(json.frete);
+    document.querySelector('.input_total').textContent = currency.format(json.total);
+    document.querySelector('.input_dias').textContent = json.dias;
+
+    json.pagamento.forEach(item =>
+    {
+        const clone = pagamento.cloneNode(true);
+
+        clone.querySelector('.tipo').textContent = item.tipo;
+        clone.querySelector('.valor').textContent = currency.format(item.valor);
+
+        pagamento.parentNode.appendChild(clone);
+    });
+
+    pagamento.remove();
+
+    const template = document.querySelector('template');
+
+    json.produtos.forEach(item =>
+    {
+        const clone = template.content.cloneNode(true);
+        const imagem = (item.imagem) ? `${item.imagem}.webp` : 'noimage.png';
+
+        clone.querySelector('.imagem img').src = `imagens/${imagem}`;
+        clone.querySelector('.nome').textContent = item.nome;
+        clone.querySelector('.quantidade').textContent = `Quantidade: ${item.quantidade}`;
+
+        container.appendChild(clone);
+    });
+}
+
+const container = document.getElementById('produtos');
+
+const query = new URLSearchParams(window.location.search);
+let url = 'api/v1/vendas';
+
+if (query.has('data'))
+{
+    url += `?data=${query.get('data')}`;
+}
+else
+{
+    url += '?data=' + new Date().toISOString().slice(0, 7);
+}
+
+buscarVendas(url);
+
+const date = flatpickr("#datepicker_date",
+{
+    disableMobile: true,
+    locale: 'pt',
+    onChange: function(selectedDates, dateStr, instance)
+    {
+        atualizarURL(dateStr);
+    }
+});
+
+const month = flatpickr("#datepicker_month",
+{
+    disableMobile: true,
+    locale: 'pt',
+    plugins: [
+        new monthSelectPlugin(
+        {
+            shorthand: true,
+            dateFormat: "Y-m"
+        })
+    ],
+    onChange: function(selectedDates, dateStr, instance)
+    {
+        atualizarURL(dateStr);
+    }
+});
+
+</script>
+    
+</body>
+</html>
