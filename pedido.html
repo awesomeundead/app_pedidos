@@ -172,7 +172,7 @@ function atualizarPedido(url, body)
     {
         notification(json.status, {success: 'Pedido atualizado com sucesso.', failure: 'Falha ao atualizar pedido.'});
 
-        document.querySelector('button[type="submit"]').disabled = false;
+        submit.disabled = false;
     })
     .catch(error =>
     {
@@ -235,10 +235,11 @@ document.getElementById('frete').addEventListener('change', () =>
     calcular();
 });
 
-document.querySelector('button[type="submit"]').addEventListener('click', e =>
+const submit = document.querySelector('button[type="submit"]');
+
+submit.addEventListener('click', e =>
 {
-    e.preventDefault();
-    e.target.disabled = true;
+    submit.disabled = true;
 
     if (confirm('Você confirma esta ação?'))
     {

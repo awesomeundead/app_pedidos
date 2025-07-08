@@ -1,30 +1,30 @@
 <?php
 
+header('Content-Type: application/json; charset=utf-8');
+
 require ROOT_DIR . '/pdo.php';
 
-$itens_id = $_POST['itens_id'];
-$itens_preco = $_POST['itens_preco'];
-$itens_preco_desconto = $_POST['itens_preco_desconto'];
-$itens_quantidade = $_POST['itens_quantidade'];
+$content = trim(file_get_contents('php://input'));
+$dados = json_decode($content, true);
 
-$nome = trim($_POST['nome']);
-$telefone = $_POST['telefone'];
-$endereco = trim($_POST['endereco']);
-$subtotal = $_POST['subtotal'];
-$desconto = $_POST['desconto'];
-$frete = $_POST['frete'];
-$total = $_POST['total'];
-$pagamento = $_POST['pagamento'];
+$nome = trim($dados['nome']);
+$telefone = $dados['telefone'];
+$endereco = trim($dados['endereco']);
+$subtotal = $dados['subtotal'];
+$desconto = $dados['desconto'];
+$frete = $dados['frete'];
+$total = $dados['total'];
+$pagamento = $dados['pagamento'];
 
-foreach ($itens_quantidade as $index => $value)
+foreach ($dados['itens'] as $item)
 {
-    if (is_numeric($value) && $value > 0)
+    if (is_numeric($item['quantidade']) && $item['quantidade'] > 0)
     {
         $pedidos_itens[] = [
-            'id' => $itens_id[$index],
-            'preco' => $itens_preco[$index],
-            'preco_desconto' => $itens_preco_desconto[$index],
-            'quantidade' => $itens_quantidade[$index]
+            'id' => $item['id'],
+            'preco' => $item['preco'],
+            'preco_desconto' => $item['preco_desconto'],
+            'quantidade' => $item['quantidade']
         ];
     }
 }
@@ -72,8 +72,6 @@ if (!empty($pedidos_itens))
         }
     }
 }
-
-header('Content-Type: application/json; charset=utf-8');
 
 $json['status'] = ($result ?? false) ? 'success' : 'failure';
 
