@@ -89,18 +89,20 @@
 function adicionar_carrinho(item)
 {
     const item_id = item.dataset.id;
+    const index = item_id - 1;
+
     let item_preco = parseFloat(document.querySelector(`[name="itens_preco"][data-id="${item_id}"]`).value);
     let item_preco_desconto = document.querySelector(`[name="itens_preco_desconto"][data-id="${item_id}"]`).value;
 
     item_preco_desconto = item_preco_desconto.length ? parseFloat(item_preco_desconto) : 0;
 
-    carrinho.push(
+    carrinho[index] =
     {
         "id": item_id,
         'preco': item_preco,
         'preco_desconto': item_preco_desconto,
         'quantidade': item.value
-    });
+    };
 
     calcular();
 }
@@ -298,11 +300,9 @@ submit.addEventListener('click', e =>
             'frete': document.getElementById('frete').value,
             'total': document.getElementById('total').value,
             'pagamento': document.getElementById('pagamento').value,
-            'itens': carrinho
+            'itens': Object.values(carrinho)
         };
-
-        console.log(JSON.stringify(body));
-
+        
         let validation;
 
         document.querySelectorAll('input, select').forEach(item =>
